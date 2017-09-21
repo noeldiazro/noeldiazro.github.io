@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://noeldiazro.github.io/"/>
-  <updated>2017-09-21T10:52:26.144Z</updated>
+  <updated>2017-09-21T11:03:33.436Z</updated>
   <id>https://noeldiazro.github.io/</id>
   
   <author>
@@ -20,10 +20,10 @@
     <title>Static Site Generators</title>
     <link href="https://noeldiazro.github.io/2017/09/Static-Site-Generators/"/>
     <id>https://noeldiazro.github.io/2017/09/Static-Site-Generators/</id>
-    <published>2017-09-21T10:52:26.144Z</published>
-    <updated>2017-09-21T10:52:26.144Z</updated>
+    <published>2017-09-21T11:03:33.436Z</published>
+    <updated>2017-09-21T11:03:33.436Z</updated>
     
-    <content type="html"><![CDATA[<p>In this post I’ll explain how you can leverage an <em>static site generator</em> to<br>create and maintain your own blog.</p><h2 id="What-is-an-static-site-generator"><a href="#What-is-an-static-site-generator" class="headerlink" title="What is an static site generator?"></a>What is an static site generator?</h2><p>First things first. There are plenty of generators and <a href="https://www.staticgen.com" target="_blank" rel="external">here</a><br>you can find a good plethora of them.</p><h3 id="How-to-create-a-new-post"><a href="#How-to-create-a-new-post" class="headerlink" title="How to create a new post"></a>How to create a new post</h3><p>From a terminal just type:</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"Terrific Title for a Blog Post"</span></div></pre></td></tr></table></figure><p>I hope you have found this an interesting post. I’ll love to see your comments below.</p><p><strong> Wait a minute! Comments? In an static page?? Are you kidding me??? </strong></p><p><a href="http://disq.us" target="_blank" rel="external">Disqus</a> to the rescue.</p>]]></content>
+    <content type="html"><![CDATA[<p>In this post I’ll explain how you can leverage an <em>static site generator</em> to<br>create and maintain your own blog.</p><h2 id="What-is-an-static-site-generator"><a href="#What-is-an-static-site-generator" class="headerlink" title="What is an static site generator?"></a>What is an static site generator?</h2><p>First things first. There are plenty of generators and <a href="https://www.staticgen.com" target="_blank" rel="external">here</a><br>you can find a good plethora of them.</p><h3 id="How-to-create-a-new-post"><a href="#How-to-create-a-new-post" class="headerlink" title="How to create a new post"></a>How to create a new post</h3><p>From a terminal just type:</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"Terrific Title for a Blog Post"</span></div></pre></td></tr></table></figure><p>I hope you have found this an interesting post. I’ll love to see your comments below.</p><p><strong> Wait a minute! Comments? In an static page?? Are you kidding me??? </strong></p><p><a href="https://disqus.com" target="_blank" rel="external">Disqus</a> to the rescue.</p>]]></content>
     
     <summary type="html">
     
