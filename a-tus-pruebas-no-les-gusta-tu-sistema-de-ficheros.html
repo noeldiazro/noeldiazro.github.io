@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />    
+    <title>Montanus</title>
+    <link rel="stylesheet" href="/theme/css/style.css" />
+  </head>
+  <body>
+    <h1><a href="/">Montanus</a></h1>
+<h2>A tus pruebas no les gusta tu sistema de ficheros</h2>
+<h3>Por <a href="/author/noel-diaz-rodriguez.html">Noel Díaz Rodríguez</a>
+<h3>Fecha: 09/10/2017</h3>
+<h3>Categoría: <a href="/category/pruebas.html">Pruebas</a></h3>
+<div id="content"><p>Es importante que las pruebas automáticas de nuestro código sean rápidas. De lo contrario, si son pesadas, siempre tendremos la tentación de evitar ejecutarlas con la periodicidad adecuada. Esto pasar a ser necesario si seguimos una metodología de Desarrollo Dirigido por Pruebas. En este caso las baterías de pruebas se lanzan casi constanstemente y unas pruebas lentas pueden lastrar nuestra productividad considerablemente, lo que con cierta facilidad nos lleve a plantearnos o directamente a abandonar esta práctica.</p>
+<p>Entre las causas por las que las pruebas pueden eternizarse nos centraremos en este artículo en las pruebas que acceden al sistema de fichero.</p>
+<p>Para ilustrar esta técnica proponemos el siguiente ejemplo a desarrollar en Python: se necesita una función que lea un fichero cuya ruta se le pasa como parámetro y devuelva una lista en la que cada elemento es la longitud de la línea del fichero correspondiente.</p>
+<p>Vamos a definir una primera prueba utilizando el framework unittest de la librería estándar de Python</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">TestCase</span>
+
+<span class="k">class</span> <span class="nc">LineLengthCounterTest</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_count_line_lengths_filesystem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">gettempdir</span><span class="p">(),</span> <span class="s1">&#39;test-file.txt&#39;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">test_file</span><span class="p">:</span>
+            <span class="n">test_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;This line is 32 characters long.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">test_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;While this one is 21.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">test_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">test_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Just 7.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>        
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">([</span><span class="mi">32</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="n">count_line_lengths</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">count_line_lengths</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="nb">file</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">file</span><span class="p">]</span>
+</pre></div>
+
+
+<p><img alt="Why - What's taking so long" src="https://i.imgur.com/7TuLXGA.gif"></p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">LineLengthCounterTest</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_count_line_lengths_filesystem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">gettempdir</span><span class="p">(),</span> <span class="s1">&#39;test-file.txt&#39;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">test_file</span><span class="p">:</span>
+            <span class="n">test_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;This line is 32 characters long.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">test_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;While this one is 21.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">test_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">test_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Just 7.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">file_accessor</span> <span class="o">=</span> <span class="n">FileWrapper</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">([</span><span class="mi">32</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="n">count_line_lengths</span><span class="p">(</span><span class="n">file_accessor</span><span class="p">))</span>
+
+
+<span class="k">class</span> <span class="nc">FileWrapper</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span> <span class="o">=</span> <span class="n">filename</span>
+
+    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">count_line_lengths</span><span class="p">(</span><span class="n">file_accessor</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">file_accessor</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="nb">file</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">file</span><span class="p">]</span>
+</pre></div>
+
+
+<p><img alt="Patience is for wimps" src="http://1.bp.blogspot.com/-6rRn93HxyEw/VhQV-9_5-_I/AAAAAAAAEKA/RYxm34i5KtY/s640/9467279.gif"></p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">TestCase</span>
+
+
+<span class="k">class</span> <span class="nc">LineLengthCounterTest</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_count_line_lengths_filesystem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">gettempdir</span><span class="p">(),</span> <span class="s1">&#39;test-file.txt&#39;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">test_file</span><span class="p">:</span>
+            <span class="n">test_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;This line is 32 characters long.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">test_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;While this one is 21.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">test_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">test_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Just 7.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">file_accessor</span> <span class="o">=</span> <span class="n">FileWrapper</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">([</span><span class="mi">32</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="n">count_line_lengths</span><span class="p">(</span><span class="n">file_accessor</span><span class="p">))</span>
+
+
+    <span class="k">def</span> <span class="nf">test_count_line_lengths_in_memory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">file_accessor</span> <span class="o">=</span> <span class="n">FakeFileWrapper</span><span class="p">(</span><span class="s1">&#39;This line is 32 characters long.</span><span class="se">\n</span><span class="s1">&#39;</span>
+                                        <span class="s1">&#39;While this one is 21.</span><span class="se">\n</span><span class="s1">&#39;</span>
+                                        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                                        <span class="s1">&#39;Just 7.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>        
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">([</span><span class="mi">32</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="n">count_line_lengths</span><span class="p">(</span><span class="n">file_accessor</span><span class="p">))</span>
+
+
+<span class="k">class</span> <span class="nc">FakeFileWrapper</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_text</span> <span class="o">=</span> <span class="n">text</span>
+
+    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_text</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">FileWrapper</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span> <span class="o">=</span> <span class="n">filename</span>
+
+    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">count_line_lengths</span><span class="p">(</span><span class="n">file_accessor</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">file_accessor</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="nb">file</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">file</span><span class="p">]</span>
+</pre></div></div>
+<h3>Etiquetas</h3>
+<ul>
+  <li><a href="/tag/pruebas-unitarias.html">Pruebas unitarias</a></li>
+  <li><a href="/tag/dobles.html">Dobles</a></li>
+  <li><a href="/tag/python.html">Python</a></li>
+</ul>
+  </body>
+</html>
